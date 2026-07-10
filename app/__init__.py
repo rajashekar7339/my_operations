@@ -1,0 +1,1 @@
+"""My Operations FastAPI application."""

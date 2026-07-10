@@ -1,0 +1,26 @@
+---
+description: Keep my_operations CLAUDE.md in sync when adding or changing toolkit features
+globs: my_operations/**
+alwaysApply: false
+---
+
+# My Operations documentation rule
+
+When working in `my_operations/`:
+
+1. **Read `CLAUDE.md` first** before making changes to understand architecture, tasks, and extension patterns.
+
+2. **Update `CLAUDE.md` in the same change** when you:
+   - Add, remove, or rename a sidebar task
+   - Add or change an API endpoint or request/response shape
+   - Add or change a formula in `app/services/`
+   - Change folder structure or run instructions
+
+3. **What to update in CLAUDE.md:**
+   - "Current sidebar tasks" section (id, formula, API, logic module)
+   - Folder map if new files/directories are added
+   - "How to add a new task" checklist if the workflow changes
+
+4. **Formula transparency:** API responses must include `formula` and `explanation` fields. UI (i) icons display these — do not hardcode formulas only in the frontend.
+
+5. **Same port:** UI and APIs stay on one FastAPI process. Do not split frontend/backend to different ports unless explicitly requested.

@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Operations</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/css/app.css">
+</head>
+<body>
+  <div class="app">
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <span class="sidebar-logo">My</span>
+        <span class="sidebar-sub">Operations</span>
+      </div>
+      <nav class="sidebar-nav" aria-label="Tasks">
+        {% for task in tasks %}
+        <button
+          type="button"
+          class="nav-item{% if loop.first %} active{% endif %}"
+          data-task="{{ task.id }}"
+          aria-current="{% if loop.first %}page{% else %}false{% endif %}"
+        >
+          <span class="nav-item-title">{{ task.title }}</span>
+        </button>
+        {% endfor %}
+      </nav>
+    </aside>
+
+    <main class="main">
+      <section class="task-panel active" id="panel-tps" data-task="tps">
+        <header class="panel-header">
+          <h1>TPS Calculator</h1>
+        </header>
+
+        <div class="calc-grid">
+          <div class="calc-block">
+            <h2 class="calc-block-title">Sustain TPS</h2>
+            <form class="calc-form" id="form-sustain">
+              <div class="field-row">
+                <label for="sustain-tps">TPS</label>
+                <input type="number" id="sustain-tps" name="tps" min="0.01" step="any" value="300" required>
+              </div>
+              <div class="field-row">
+                <label for="sustain-minutes">Duration (minutes)</label>
+                <input type="number" id="sustain-minutes" name="minutes" min="0.01" step="any" value="20" required>
+              </div>
+              <button type="submit" class="btn-primary">Calculate</button>
+            </form>
+
+            <div class="result-card hidden" id="result-sustain">
+              <div class="result-header">
+                <span class="result-label">Total transactions</span>
+                <button type="button" class="info-btn" aria-label="View formula" data-info-target="info-sustain">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="result-value" id="result-sustain-value">—</p>
+              <div class="info-popover hidden" id="info-sustain" role="tooltip">
+                <p class="info-formula" id="info-sustain-formula"></p>
+                <p class="info-explanation" id="info-sustain-explanation"></p>
+              </div>
+            </div>
+          </div>
+
+          <div class="calc-block">
+            <h2 class="calc-block-title">Fixed Dataset Duration</h2>
+            <form class="calc-form" id="form-duration">
+              <div class="field-row">
+                <label for="duration-transactions">Total transactions</label>
+                <input type="number" id="duration-transactions" name="transactions" min="1" step="1" value="1000000" required>
+              </div>
+              <div class="field-row">
+                <label for="duration-tps">TPS</label>
+                <input type="number" id="duration-tps" name="tps" min="0.01" step="any" value="300" required>
+              </div>
+              <button type="submit" class="btn-primary">Calculate</button>
+            </form>
+
+            <div class="result-card hidden" id="result-duration">
+              <div class="result-header">
+                <span class="result-label">Duration</span>
+                <button type="button" class="info-btn" aria-label="View formula" data-info-target="info-duration">
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <path d="M12 16v-4M12 8h.01"/>
+                  </svg>
+                </button>
+              </div>
+              <p class="result-value" id="result-duration-value">—</p>
+              <div class="info-popover hidden" id="info-duration" role="tooltip">
+                <p class="info-formula" id="info-duration-formula"></p>
+                <p class="info-explanation" id="info-duration-explanation"></p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/static/js/app.js"></script>
+</body>
+</html>
