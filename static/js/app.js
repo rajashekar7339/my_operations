@@ -16,6 +16,9 @@
       btn.classList.add("active");
       btn.setAttribute("aria-current", "page");
       document.getElementById(`panel-${taskId}`)?.classList.add("active");
+      if (taskId === "dashboard") {
+        loadDashboard();
+      }
     });
   });
 
@@ -128,4 +131,75 @@
       btn.disabled = false;
     }
   });
+
+  // App Dashboard
+  const dashboardBody = document.getElementById("dashboard-body");
+  const dashboardMeta = document.getElementById("dashboard-meta");
+  const dashboardError = document.getElementById("dashboard-error");
+  const dashboardRefresh = document.getElementById("dashboard-refresh");
+  let dashboardLoaded = false;
+
+  function renderCell(cell) {
+    const tone = cell.tone || "error";
+    if (cell.ok && cell.version) {
+      const sub = cell.tone === "conflict" ? "differs from majority" : "";
+      return `<td class="dashboard-cell tone-${tone}">${cell.version}${
+        sub ? `<span class="dashboard-cell-sub">${sub}</span>` : ""
+      }</td>`;
+    }
+    const label = cell.status ? `HTTP ${cell.status}` : (cell.error || "Error");
+    return `<td class="dashboard-cell tone-error">${label}</td>`;
+  }
+
+  function renderDashboard(data) {
+    const envs = data.environments;
+    const thead = document.querySelector("#dashboard-table thead tr");
+    thead.innerHTML =
+      '<th scope="col">App</th>' +
+      envs.map((e) => `<th scope="col">${e}</th>`).join("");
+
+    dashboardBody.innerHTML = data.apps
+      .map((app) => {
+        const cells = envs.map((env) => renderCell(app.environments[env])).join("");
+        const conflict = app.has_conflict
+          ? ' <span class="dashboard-cell-sub">conflict</span>'
+          : "";
+        return `<tr>
+          <td class="dashboard-app-name">${app.name}${conflict}</td>
+          ${cells}
+        </tr>`;
+      })
+      .join("");
+
+    if (data.checked_at) {
+      const when = new Date(data.checked_at).toLocaleString();
+      dashboardMeta.textContent = `Last checked: ${when}`;
+      dashboardMeta.classList.remove("hidden");
+    }
+  }
+
+  async function loadDashboard() {
+    dashboardError.classList.add("hidden");
+    dashboardRefresh.disabled = true;
+    dashboardBody.innerHTML =
+      '<tr><td colspan="6" class="dashboard-loading">Loading…</td></tr>';
+
+    try {
+      const res = await fetch("/api/dashboard");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        throw new Error(data.detail || res.statusText || "Request failed");
+      }
+      renderDashboard(data);
+      dashboardLoaded = true;
+    } catch (err) {
+      dashboardBody.innerHTML = "";
+      dashboardError.textContent = err.message;
+      dashboardError.classList.remove("hidden");
+    } finally {
+      dashboardRefresh.disabled = false;
+    }
+  }
+
+  dashboardRefresh?.addEventListener("click", () => loadDashboard());
 })();

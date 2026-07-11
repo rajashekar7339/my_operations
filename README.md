@@ -23,11 +23,20 @@ Open http://127.0.0.1:8000
 
 ## Tasks
 
-| Task | Calculators |
+| Task | Description |
 |------|-------------|
-| TPS Calculator | Sustain TPS (TPS + minutes → transactions); Fixed Dataset Duration (transactions + TPS → time) |
+| TPS Calculator | Sustain TPS + Fixed Dataset Duration side by side |
+| App Dashboard | App1–3 version matrix across dev/uat/sit/perf/prod with conflict coloring |
 
-Click the **(i)** icon on any result to see the formula and worked example.
+Click the **(i)** icon on calculator results to see the formula and worked example.
+
+### App Dashboard local test
+
+```bash
+cd ../mock_actuators && uvicorn mock:app --reload --port 9001
+```
+
+Then run My Operations and open **App Dashboard**.
 
 ## Docs for agents
 

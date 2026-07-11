@@ -1,0 +1,32 @@
+environments:
+  - dev
+  - uat
+  - sit
+  - perf
+  - prod
+timeout_seconds: 5
+apps:
+  - id: app1
+    name: App1
+    urls:
+      dev: https://app1-dev.example.com/actuator/info
+      uat: https://app1-uat.example.com/actuator/info
+      sit: https://app1-sit.example.com/actuator/info
+      perf: https://app1-perf.example.com/actuator/info
+      prod: https://app1-prod.example.com/actuator/info
+  - id: app2
+    name: App2
+    urls:
+      dev: https://app2-dev.example.com/actuator/info
+      uat: https://app2-uat.example.com/actuator/info
+      sit: https://app2-sit.example.com/actuator/info
+      perf: https://app2-perf.example.com/actuator/info
+      prod: https://app2-prod.example.com/actuator/info
+  - id: app3
+    name: App3
+    urls:
+      dev: https://app3-dev.example.com/actuator/info
+      uat: https://app3-uat.example.com/actuator/info
+      sit: https://app3-sit.example.com/actuator/info
+      perf: https://app3-perf.example.com/actuator/info
+      prod: https://app3-prod.example.com/actuator/info

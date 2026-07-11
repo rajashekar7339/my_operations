@@ -1,0 +1,32 @@
+environments:
+  - dev
+  - uat
+  - sit
+  - perf
+  - prod
+timeout_seconds: 5
+apps:
+  - id: app1
+    name: App1
+    urls:
+      dev: http://127.0.0.1:9001/app1/dev/actuator/info
+      uat: http://127.0.0.1:9001/app1/uat/actuator/info
+      sit: http://127.0.0.1:9001/app1/sit/actuator/info
+      perf: http://127.0.0.1:9001/app1/perf/actuator/info
+      prod: http://127.0.0.1:9001/app1/prod/actuator/info
+  - id: app2
+    name: App2
+    urls:
+      dev: http://127.0.0.1:9001/app2/dev/actuator/info
+      uat: http://127.0.0.1:9001/app2/uat/actuator/info
+      sit: http://127.0.0.1:9001/app2/sit/actuator/info
+      perf: http://127.0.0.1:9001/app2/perf/actuator/info
+      prod: http://127.0.0.1:9001/app2/prod/actuator/info
+  - id: app3
+    name: App3
+    urls:
+      dev: http://127.0.0.1:9001/app3/dev/actuator/info
+      uat: http://127.0.0.1:9001/app3/uat/actuator/info
+      sit: http://127.0.0.1:9001/app3/sit/actuator/info
+      perf: http://127.0.0.1:9001/app3/perf/actuator/info
+      prod: http://127.0.0.1:9001/app3/prod/actuator/info

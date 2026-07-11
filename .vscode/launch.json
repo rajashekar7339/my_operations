@@ -19,6 +19,28 @@
       "env": {
         "PYTHONPATH": "${workspaceFolder}"
       }
+    },
+    {
+      "name": "Mock Actuators",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "uvicorn",
+      "args": [
+        "mock:app",
+        "--reload",
+        "--port",
+        "9001"
+      ],
+      "cwd": "${workspaceFolder}/../mock_actuators",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "jinja": true,
+      "preLaunchTask": "Prepare mock launch"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "My Operations + Mock",
+      "configurations": ["Mock Actuators", "My Operations"]
     }
   ]
 }

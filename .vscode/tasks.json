@@ -15,6 +15,21 @@
         "showReuseMessage": false,
         "clear": false
       }
+    },
+    {
+      "label": "Prepare mock launch",
+      "type": "shell",
+      "command": "lsof -ti :9001 | xargs kill -9 2>/dev/null; true; ${workspaceFolder}/.venv/bin/python -m pip install -r requirements.txt",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "silent",
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      }
     }
   ]
 }

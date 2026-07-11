@@ -14,7 +14,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8000
 ```
 
-Or from Cursor: **Run and Debug** → **My Operations** (installs `requirements.txt`, then starts uvicorn).
+Or from Cursor: **Run and Debug** → **My Operations** (installs `requirements.txt`, then starts uvicorn). For the App Dashboard mock: **Mock Actuators** (`:9001`) or **My Operations + Mock** (both).
 
 Open http://127.0.0.1:8000
 
@@ -26,7 +26,11 @@ Open http://127.0.0.1:8000
 | `.vscode/tasks.json` | Pre-launch task: `pip install -r requirements.txt` |
 | `app/main.py` | FastAPI app: mounts static files, serves `index.html`, includes routers |
 | `app/routers/calculators.py` | HTTP endpoints under `/api/*` |
+| `app/routers/dashboard.py` | `GET /api/dashboard` — app version matrix |
 | `app/services/calculators.py` | Sustain TPS and fixed dataset duration formulas |
+| `app/services/dashboard.py` | YAML config load, parallel actuator GETs, version tones |
+| `config/apps.yaml` | App × environment actuator URLs (local mock by default) |
+| `config/apps.example.yaml` | Template for real environment URLs |
 | `templates/index.html` | Shell: sidebar + task panels |
 | `static/css/app.css` | UI styles |
 | `static/js/app.js` | Sidebar nav, form submit, (i) info popovers |
@@ -40,8 +44,9 @@ Open http://127.0.0.1:8000
 Browser (:8000)
  → GET /              → Jinja template (HTML shell)
  → /static/*          → CSS, JS
- → POST /api/sustain  → app/services/calculators.py
- → POST /api/duration → app/services/calculators.py
+ → POST /api/sustain   → app/services/calculators.py
+ → POST /api/duration  → app/services/calculators.py
+ → GET /api/dashboard  → app/services/dashboard.py → config/apps.yaml
 ```
 
 ## Current sidebar tasks
@@ -79,6 +84,33 @@ Single screen with two calculators side by side.
 **Response:** `{ "seconds", "minutes", "formula", "explanation", "inputs" }`
 
 **Logic:** `app/services/calculators.py` → `calculate_duration()`
+
+### 2. App Dashboard (`id: dashboard`)
+
+Matrix of **App1 / App2 / App3** × **dev, uat, sit, perf, prod**. Simple GET to each actuator URL in [`config/apps.yaml`](config/apps.yaml); expects HTTP 200 and `{"version": "..."}`.
+
+**API:** `GET /api/dashboard` (also `POST /api/dashboard/refresh`)
+
+**Cell tones (per app row):**
+- **Green** (`match`) — version matches the majority among healthy envs
+- **Yellow** (`conflict`) — healthy but different version
+- **Red** (`error`) — timeout, non-200, or missing version
+
+**Logic:** `app/services/dashboard.py`
+
+#### Local mock (outside repo)
+
+Sibling folder `../mock_actuators/` on port **9001** — do not check in. See that folder's README.
+
+```bash
+# Terminal 1
+cd ../mock_actuators && uvicorn mock:app --reload --port 9001
+
+# Terminal 2 — My Operations
+uvicorn app.main:app --reload --port 8000
+```
+
+Swap URLs in `config/apps.yaml` for real actuator endpoints when ready.
 
 ## API response contract
 

@@ -102,6 +102,42 @@
           </div>
         </div>
       </section>
+
+      <section class="task-panel" id="panel-dashboard" data-task="dashboard">
+        <header class="panel-header panel-header-row">
+          <h1>App Dashboard</h1>
+          <button type="button" class="btn-primary" id="dashboard-refresh">Refresh</button>
+        </header>
+
+        <p class="dashboard-meta hidden" id="dashboard-meta"></p>
+        <p class="dashboard-error hidden" id="dashboard-error"></p>
+
+        <div class="dashboard-wrap">
+          <table class="dashboard-table" id="dashboard-table">
+            <thead>
+              <tr>
+                <th scope="col">App</th>
+                <th scope="col">dev</th>
+                <th scope="col">uat</th>
+                <th scope="col">sit</th>
+                <th scope="col">perf</th>
+                <th scope="col">prod</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-body">
+              <tr>
+                <td colspan="6" class="dashboard-loading">Loading…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="dashboard-legend">
+          <span class="legend-item"><span class="legend-swatch tone-match"></span> Majority version</span>
+          <span class="legend-item"><span class="legend-swatch tone-conflict"></span> Version conflict</span>
+          <span class="legend-item"><span class="legend-swatch tone-error"></span> Unreachable / error</span>
+        </div>
+      </section>
     </main>
   </div>
 
