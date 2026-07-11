@@ -24,7 +24,7 @@
   }
 
   function actuatorLink(cell) {
-    if (!cell.url) return "";
+    if (!cell || !cell.url || cell.na) return "";
     const href = escapeHtml(cell.url);
     return `<a class="dashboard-cell-link" href="${href}" target="_blank" rel="noopener noreferrer" title="${href}" aria-label="Open actuator">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -36,6 +36,12 @@
   }
 
   function renderCell(cell) {
+    if (!cell) {
+      return `<td class="dashboard-cell tone-na">N/A</td>`;
+    }
+    if (cell.na || cell.tone === "na") {
+      return `<td class="dashboard-cell tone-na">N/A</td>`;
+    }
     const tone = cell.tone || "error";
     const link = actuatorLink(cell);
     if (cell.ok && cell.version) {
@@ -57,16 +63,51 @@
     </td>`;
   }
 
-  function renderDashboard(data) {
+  function renderDashboardHeader(data) {
+    const thead = document.querySelector("#dashboard-table thead");
     const envs = data.environments;
-    const thead = document.querySelector("#dashboard-table thead tr");
+    const columns = data.columns;
+    const hasRegions = columns.some((c) => c.region);
+
+    if (!hasRegions) {
+      thead.innerHTML =
+        "<tr><th scope=\"col\">App</th>" +
+        columns.map((c) => `<th scope="col">${c.label}</th>`).join("") +
+        "</tr>";
+      return;
+    }
+
+    const top = ['<th scope="col" rowspan="2">App</th>'];
+    const bottom = [];
+
+    for (const env of envs) {
+      const regions = env.regions || [];
+      if (!regions.length) {
+        top.push(`<th scope="col" rowspan="2">${env.id}</th>`);
+      } else {
+        top.push(
+          `<th scope="colgroup" colspan="${regions.length}">${env.id}</th>`
+        );
+        for (const region of regions) {
+          bottom.push(`<th scope="col">${region}</th>`);
+        }
+      }
+    }
+
     thead.innerHTML =
-      '<th scope="col">App</th>' +
-      envs.map((e) => `<th scope="col">${e}</th>`).join("");
+      `<tr>${top.join("")}</tr>` +
+      (bottom.length ? `<tr>${bottom.join("")}</tr>` : "");
+  }
+
+  function renderDashboard(data) {
+    const columns = data.columns;
+    renderDashboardHeader(data);
 
     dashboardBody.innerHTML = data.apps
       .map((app) => {
-        const cells = envs.map((env) => renderCell(app.environments[env])).join("");
+        const cells = columns
+          .map((col) => renderCell(app.cells[col.key]))
+          .join("");
         const conflict = app.has_conflict
           ? ' <span class="dashboard-cell-sub">conflict</span>'
           : "";

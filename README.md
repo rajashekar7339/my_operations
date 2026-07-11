@@ -26,7 +26,7 @@ Open http://127.0.0.1:8000
 | Task | Description |
 |------|-------------|
 | TPS Calculator | Sustain TPS + Fixed Dataset Duration side by side |
-| App Dashboard | App1–3 version matrix across dev/uat/sit/perf/prod with conflict coloring |
+| App Dashboard | App1–3 version matrix across envs/regions (east/west) with conflict coloring |
 
 Click the **(i)** icon on calculator results to see the formula and worked example.
 

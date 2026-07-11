@@ -90,14 +90,15 @@ Single screen with two calculators side by side.
 
 ### 2. App Dashboard (`id: dashboard`, path: `/app_dashboard`)
 
-Matrix of **App1 / App2 / App3** × **dev, uat, sit, perf, prod**. Simple GET to each actuator URL in [`config/apps.yaml`](config/apps.yaml); expects HTTP 200 and `{"version": "..."}`.
+Matrix of **App1 / App2 / App3** × environments × regions. Layout is inferred from each app’s `urls` map in [`config/apps.yaml`](config/apps.yaml) — no separate environments list. Every env uses region keys (e.g. `east` / `west`). Use a URL string, or `N/A` when that region does not exist (no HTTP call; cell shows N/A).
 
 **API:** `GET /api/dashboard`
 
-**Cell tones (per app row):**
-- **Green** (`match`) — version matches the majority among healthy envs
+**Cell tones (per app row, across all region cells):**
+- **Green** (`match`) — version matches the majority among healthy cells
 - **Yellow** (`conflict`) — healthy but different version
 - **Red** (`error`) — timeout, non-200, or missing version
+- **Muted** (`na`) — YAML value is `N/A` (skipped; does not count toward majority)
 
 **Logic:** `app/services/dashboard.py`
 

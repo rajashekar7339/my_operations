@@ -12,13 +12,72 @@ import yaml
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 CONFIG_PATH = BASE_DIR / "config" / "apps.yaml"
 
+NA_VALUES = {None, "", "n/a", "N/A", "na", "NA"}
+
 
 def load_config() -> dict[str, Any]:
     with CONFIG_PATH.open(encoding="utf-8") as f:
         return yaml.safe_load(f)
 
 
-async def _fetch_env(
+def is_na(value: Any) -> bool:
+    if value is None:
+        return True
+    if isinstance(value, str) and value.strip() in NA_VALUES:
+        return True
+    return False
+
+
+def infer_layout(apps: list[dict[str, Any]]) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Build environments + columns from the first app's urls map."""
+    if not apps:
+        return [], []
+
+    urls = apps[0]["urls"]
+    environments: list[dict[str, Any]] = []
+    columns: list[dict[str, Any]] = []
+
+    for env_id, entry in urls.items():
+        if not isinstance(entry, dict):
+            raise ValueError(
+                f"urls.{env_id} must be a map of region → URL (or N/A)"
+            )
+        regions = list(entry.keys())
+        environments.append({"id": env_id, "regions": regions})
+        for region in regions:
+            columns.append(
+                {
+                    "key": f"{env_id}.{region}",
+                    "env": env_id,
+                    "region": region,
+                    "label": region,
+                }
+            )
+
+    return environments, columns
+
+
+def resolve_url(app_urls: dict[str, Any], column: dict[str, Any]) -> Any:
+    entry = app_urls.get(column["env"])
+    if not isinstance(entry, dict):
+        raise ValueError(f"Missing region map for env '{column['env']}'")
+    if column["region"] not in entry:
+        return "N/A"
+    return entry[column["region"]]
+
+
+def _na_cell() -> dict[str, Any]:
+    return {
+        "ok": False,
+        "status": None,
+        "version": None,
+        "url": None,
+        "na": True,
+        "tone": "na",
+    }
+
+
+async def _fetch_cell(
     client: httpx.AsyncClient, url: str, timeout: float
 ) -> dict[str, Any]:
     try:
@@ -67,12 +126,12 @@ async def _fetch_env(
 
 
 def _baseline_version(
-    env_order: list[str], env_results: dict[str, dict[str, Any]]
+    column_keys: list[str], cells: dict[str, dict[str, Any]]
 ) -> str | None:
     healthy = [
-        (env, env_results[env]["version"])
-        for env in env_order
-        if env_results.get(env, {}).get("ok") and env_results[env].get("version")
+        (key, cells[key]["version"])
+        for key in column_keys
+        if cells.get(key, {}).get("ok") and cells[key].get("version")
     ]
     if not healthy:
         return None
@@ -81,20 +140,23 @@ def _baseline_version(
     max_count = max(counts.values())
     tied = {v for v, c in counts.items() if c == max_count}
 
-    for env, version in healthy:
+    for _, version in healthy:
         if version in tied:
             return version
     return None
 
 
 def _apply_tones(
-    env_order: list[str], env_results: dict[str, dict[str, Any]]
+    column_keys: list[str], cells: dict[str, dict[str, Any]]
 ) -> tuple[str | None, bool]:
-    baseline = _baseline_version(env_order, env_results)
+    baseline = _baseline_version(column_keys, cells)
     has_conflict = False
 
-    for env in env_order:
-        cell = env_results[env]
+    for key in column_keys:
+        cell = cells[key]
+        if cell.get("na"):
+            cell["tone"] = "na"
+            continue
         if not cell.get("ok"):
             cell["tone"] = "error"
             continue
@@ -109,44 +171,48 @@ def _apply_tones(
 
 async def fetch_dashboard() -> dict[str, Any]:
     config = load_config()
-    env_order: list[str] = config["environments"]
-    timeout = float(config.get("timeout_seconds", 5))
     apps_config: list[dict[str, Any]] = config["apps"]
+    environments, columns = infer_layout(apps_config)
+    column_keys = [c["key"] for c in columns]
+    timeout = float(config.get("timeout_seconds", 5))
 
     async with httpx.AsyncClient() as client:
         tasks = []
         task_meta: list[tuple[int, str]] = []
+        ready: dict[tuple[int, str], dict[str, Any]] = {}
 
         for app_idx, app in enumerate(apps_config):
-            for env in env_order:
-                url = app["urls"][env]
-                tasks.append(_fetch_env(client, url, timeout))
-                task_meta.append((app_idx, env))
+            for column in columns:
+                key = column["key"]
+                url = resolve_url(app["urls"], column)
+                if is_na(url):
+                    ready[(app_idx, key)] = _na_cell()
+                    continue
+                tasks.append(_fetch_cell(client, str(url), timeout))
+                task_meta.append((app_idx, key))
 
         results = await asyncio.gather(*tasks)
 
-    app_env_results: dict[int, dict[str, dict[str, Any]]] = {
-        i: {} for i in range(len(apps_config))
-    }
-    for (app_idx, env), result in zip(task_meta, results):
-        app_env_results[app_idx][env] = result
+    for (app_idx, key), result in zip(task_meta, results):
+        ready[(app_idx, key)] = result
 
     apps_out = []
     for app_idx, app in enumerate(apps_config):
-        env_results = app_env_results[app_idx]
-        baseline, has_conflict = _apply_tones(env_order, env_results)
+        cells = {key: ready[(app_idx, key)] for key in column_keys}
+        baseline, has_conflict = _apply_tones(column_keys, cells)
         apps_out.append(
             {
                 "id": app["id"],
                 "name": app["name"],
                 "baseline_version": baseline,
                 "has_conflict": has_conflict,
-                "environments": env_results,
+                "cells": cells,
             }
         )
 
     return {
-        "environments": env_order,
+        "environments": environments,
+        "columns": columns,
         "apps": apps_out,
         "checked_at": datetime.now(timezone.utc).isoformat(),
     }

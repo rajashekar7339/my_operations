@@ -151,7 +151,7 @@ html, body {
 }
 
 .task-panel#panel-dashboard {
-  max-width: 1100px;
+  max-width: 1400px;
 }
 
 .calc-grid {
@@ -385,6 +385,11 @@ html, body {
   letter-spacing: 0.08em;
   color: var(--text-muted);
   background: rgba(0, 0, 0, 0.2);
+  vertical-align: middle;
+}
+
+.dashboard-table thead th[colspan] {
+  border-bottom: 1px solid var(--border);
 }
 
 .dashboard-table tbody tr:last-child td {
@@ -421,6 +426,11 @@ html, body {
 .dashboard-cell.tone-error {
   background: rgba(239, 68, 68, 0.1);
   color: #f87171;
+}
+
+.dashboard-cell.tone-na {
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-muted);
 }
 
 .dashboard-cell-sub {
@@ -489,6 +499,10 @@ html, body {
 
 .legend-swatch.tone-error {
   background: #f87171;
+}
+
+.legend-swatch.tone-na {
+  background: #8b929e;
 }
 
 @media (max-width: 640px) {
