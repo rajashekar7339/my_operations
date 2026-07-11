@@ -42,16 +42,19 @@ Open http://127.0.0.1:8000
 
 ```
 Browser (:8000)
- → GET /              → Jinja template (HTML shell)
- → /static/*          → CSS, JS
- → POST /api/sustain   → app/services/calculators.py
- → POST /api/duration  → app/services/calculators.py
- → GET /api/dashboard  → app/services/dashboard.py → config/apps.yaml
+ → GET /                 → redirect to /tps_calculator
+ → GET /tps_calculator   → Jinja shell (TPS panel active)
+ → GET /app_dashboard    → Jinja shell (dashboard panel active)
+ → /static/*             → CSS, JS
+ → POST /api/sustain     → app/services/calculators.py
+ → POST /api/duration    → app/services/calculators.py
+ → GET /api/dashboard    → app/services/dashboard.py → config/apps.yaml
 ```
 
+Sidebar clicks update the URL via `history.pushState` so refresh stays on the current task.
 ## Current sidebar tasks
 
-### 1. TPS Calculator (`id: tps`)
+### 1. TPS Calculator (`id: tps`, path: `/tps_calculator`)
 
 Single screen with two calculators side by side.
 
@@ -85,11 +88,11 @@ Single screen with two calculators side by side.
 
 **Logic:** `app/services/calculators.py` → `calculate_duration()`
 
-### 2. App Dashboard (`id: dashboard`)
+### 2. App Dashboard (`id: dashboard`, path: `/app_dashboard`)
 
 Matrix of **App1 / App2 / App3** × **dev, uat, sit, perf, prod**. Simple GET to each actuator URL in [`config/apps.yaml`](config/apps.yaml); expects HTTP 200 and `{"version": "..."}`.
 
-**API:** `GET /api/dashboard` (also `POST /api/dashboard/refresh`)
+**API:** `GET /api/dashboard`
 
 **Cell tones (per app row):**
 - **Green** (`match`) — version matches the majority among healthy envs
@@ -125,15 +128,16 @@ Every calculator returns:
 
 1. **Logic** — Add a function in `app/services/` returning `{ result fields, formula, explanation, inputs }`.
 2. **Router** — Add Pydantic request model + `POST /api/<task>` in `app/routers/` (or new router included in `app/main.py`).
-3. **Sidebar** — Add entry to `tasks` list in `app/main.py` `index()` view.
+3. **Sidebar** — Add entry to `TASKS` in `app/main.py` with `id`, `title`, and `path`, plus a matching `GET` route that renders the shell.
 4. **UI panel** — Add `<section class="task-panel">` in `templates/index.html` with form + result card + (i) popover.
 5. **JS** — Add form handler in `static/js/app.js` calling the new endpoint.
 6. **CLAUDE.md** — Document the new task in "Current sidebar tasks" and update folder map if needed.
 
 ## UI notes
 
-- Left sidebar lists tasks; clicking switches panels client-side (no reload).
-- Each result has an **(i)** icon; popover shows `formula` and `explanation` from API response.
+- Left sidebar lists tasks; clicking switches panels and updates the URL (`/tps_calculator`, `/app_dashboard`).
+- Refresh or direct links stay on the active task.
+- Each calculator result has an **(i)** icon; popover shows `formula` and `explanation` from API response.
 - Do not duplicate formula logic in JavaScript — always use backend `formula` / `explanation`.
 
 ## Dependencies

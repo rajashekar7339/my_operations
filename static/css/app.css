@@ -245,7 +245,6 @@ html, body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: rgba(0, 0, 0, 0.2);
-  position: relative;
 }
 
 .result-card.hidden {
@@ -402,6 +401,13 @@ html, body {
   border-radius: 6px;
 }
 
+.dashboard-cell-main {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
 .dashboard-cell.tone-match {
   background: rgba(74, 222, 128, 0.12);
   color: #4ade80;
@@ -422,6 +428,29 @@ html, body {
   margin-top: 0.25rem;
   font-size: 0.6875rem;
   opacity: 0.8;
+}
+
+.dashboard-cell-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 5px;
+  color: inherit;
+  opacity: 0.35;
+  text-decoration: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.dashboard-cell:hover .dashboard-cell-link,
+.dashboard-cell-link:focus-visible {
+  opacity: 0.9;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.dashboard-cell-link:hover {
+  opacity: 1;
 }
 
 .dashboard-loading {

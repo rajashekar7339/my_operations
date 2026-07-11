@@ -38,7 +38,6 @@ async def _fetch_env(
                 "ok": False,
                 "status": status,
                 "version": None,
-                "tone": "error",
                 "error": "Response missing version field",
                 "url": url,
             }
@@ -46,7 +45,6 @@ async def _fetch_env(
             "ok": False,
             "status": status,
             "version": None,
-            "tone": "error",
             "error": f"HTTP {status}",
             "url": url,
         }
@@ -55,7 +53,6 @@ async def _fetch_env(
             "ok": False,
             "status": None,
             "version": None,
-            "tone": "error",
             "error": "Timeout",
             "url": url,
         }
@@ -64,7 +61,6 @@ async def _fetch_env(
             "ok": False,
             "status": None,
             "version": None,
-            "tone": "error",
             "error": str(exc),
             "url": url,
         }
@@ -119,20 +115,20 @@ async def fetch_dashboard() -> dict[str, Any]:
 
     async with httpx.AsyncClient() as client:
         tasks = []
-        task_meta: list[tuple[int, str, str]] = []
+        task_meta: list[tuple[int, str]] = []
 
         for app_idx, app in enumerate(apps_config):
             for env in env_order:
                 url = app["urls"][env]
                 tasks.append(_fetch_env(client, url, timeout))
-                task_meta.append((app_idx, app["id"], env))
+                task_meta.append((app_idx, env))
 
         results = await asyncio.gather(*tasks)
 
     app_env_results: dict[int, dict[str, dict[str, Any]]] = {
         i: {} for i in range(len(apps_config))
     }
-    for (app_idx, _app_id, env), result in zip(task_meta, results):
+    for (app_idx, env), result in zip(task_meta, results):
         app_env_results[app_idx][env] = result
 
     apps_out = []

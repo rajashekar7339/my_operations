@@ -20,18 +20,19 @@
         {% for task in tasks %}
         <button
           type="button"
-          class="nav-item{% if loop.first %} active{% endif %}"
+          class="nav-item{% if task.id == active_task %} active{% endif %}"
           data-task="{{ task.id }}"
-          aria-current="{% if loop.first %}page{% else %}false{% endif %}"
+          data-path="{{ task.path }}"
+          aria-current="{% if task.id == active_task %}page{% else %}false{% endif %}"
         >
-          <span class="nav-item-title">{{ task.title }}</span>
+          <span>{{ task.title }}</span>
         </button>
         {% endfor %}
       </nav>
     </aside>
 
     <main class="main">
-      <section class="task-panel active" id="panel-tps" data-task="tps">
+      <section class="task-panel{% if active_task == 'tps' %} active{% endif %}" id="panel-tps">
         <header class="panel-header">
           <h1>TPS Calculator</h1>
         </header>
@@ -103,7 +104,7 @@
         </div>
       </section>
 
-      <section class="task-panel" id="panel-dashboard" data-task="dashboard">
+      <section class="task-panel{% if active_task == 'dashboard' %} active{% endif %}" id="panel-dashboard">
         <header class="panel-header panel-header-row">
           <h1>App Dashboard</h1>
           <button type="button" class="btn-primary" id="dashboard-refresh">Refresh</button>
@@ -117,16 +118,11 @@
             <thead>
               <tr>
                 <th scope="col">App</th>
-                <th scope="col">dev</th>
-                <th scope="col">uat</th>
-                <th scope="col">sit</th>
-                <th scope="col">perf</th>
-                <th scope="col">prod</th>
               </tr>
             </thead>
             <tbody id="dashboard-body">
               <tr>
-                <td colspan="6" class="dashboard-loading">Loading…</td>
+                <td class="dashboard-loading">Loading…</td>
               </tr>
             </tbody>
           </table>

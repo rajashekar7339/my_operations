@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter
 from pydantic import BaseModel, Field
 
 from app.services.calculators import calculate_duration, calculate_sustain_tps
@@ -18,15 +18,9 @@ class DurationRequest(BaseModel):
 
 @router.post("/sustain")
 def sustain_tps(body: SustainRequest):
-    try:
-        return calculate_sustain_tps(body.tps, body.minutes)
-    except ZeroDivisionError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return calculate_sustain_tps(body.tps, body.minutes)
 
 
 @router.post("/duration")
 def fixed_dataset_duration(body: DurationRequest):
-    try:
-        return calculate_duration(body.transactions, body.tps)
-    except ZeroDivisionError as exc:
-        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return calculate_duration(body.transactions, body.tps)
