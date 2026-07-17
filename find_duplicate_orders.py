@@ -1,23 +1,3 @@
-#!/usr/bin/env python3
-"""
-CLI tool to scan a large log/CSV dump for duplicate order numbers:
-`ln` (legacy order number), `lln` (long order number), and `sn` (short
-order number).
-
-Log lines look like:
-
-    Response
-    Body:{"messages": {...}, "orderNumbersSet": [{"ln": "26197IJS6L", "lln": "...", "sn": "..."}]}
-
-Only lines starting with `Body:` are parsed as JSON. Every entry in
-`orderNumbersSet` contributes its `ln`, `lln`, and `sn` to their own
-running counts. After scanning the whole file, any values seen more than
-once are reported per field.
-
-Usage:
-    python find_duplicate_orders.py /path/to/yourfile.csv
-"""
-
 import argparse
 import json
 import sys
